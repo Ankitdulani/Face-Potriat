@@ -9,320 +9,13 @@ from PIL import Image
 from operator import itemgetter
 from scipy.spatial import Delaunay
 from modules import vector
-from modules import Points2D
-from modules import Plane3D
-from modules import Line2D
-from modules import BresenhamLine
+from modules import Point2D
+from modules import Reader
+from modules import Surface
+# from modules import Plane3D
+# from modules import Line2D
+# from modules import BresenhamLine
 
-#Return a tuple
-def readVertexs(pathName):
-
-	file =open(pathName,'r')
-
-	A=[]
-	B=[]
-	C=[]
-
-	for line in file:
-		x=line.strip().split(',')
-		A.append(float(x[0]))
-		B.append(float(x[1]))
-		C.append(float(x[2]))
-
-	return A,B,C
-
-# Returns a tuple
-def readFaces(pathName):
-
-	A,B,C =readVertexs(pathName)
-
-	Faces=[]
-	for i in range(len(A)):
-		face=[]
-		face.append(int(A[i]))
-		face.append(int(B[i]))
-		face.append(int(C[i]))
-		Faces.append(face)
-
-	return Faces
-
-#return the list of edges
-def getEdges(Faces):
-	Edges=[]
-
-	for i in range(len(Faces)):
-		Edges.append((min(Faces[i][0],Faces[i][1]),max(Faces[i][0],Faces[i][1])))
-		Edges.append((min(Faces[i][1],Faces[i][2]),max(Faces[i][1],Faces[i][2])))
-		Edges.append((min(Faces[i][0],Faces[i][2]),max(Faces[i][0],Faces[i][2])))
-
-	return Edges
-
-#return Dict Edges with same Slopes
-# dictonary holds the key that is slope and List of Edges
-def getBoundaryEdges(X,Y,Z, Edges , perc=6):
-
-	hashMapParllelEdges=dict()
-
-	boundaryEdges=[]
-
-	for Edge in Edges:
-
-		# creating key for hash map 
-		l=abs(X[Edge[0]]-X[Edge[1]])
-		m=abs(Y[Edge[0]]-Y[Edge[1]])
-		n=abs(Z[Edge[0]]-Z[Edge[1]])
-
-		mod = math.sqrt(l** 2 + m**2 +n**2)
-
-		l = str("{0:.6f}".format(l/mod))
-		m = str("{0:.6f}".format(m/mod))
-		n = str("{0:.6f}".format(n/mod))
-
-		key =l+m+n
-
-		#Checking for parllel edges
-		#Also removing the edge if used twice in the code.
-		if hashMapParllelEdges.get(key) == None:
-			hashMapParllelEdges[key] = [Edge]
-		else :
-			if (Edge) in hashMapParllelEdges[key]:
-				hashMapParllelEdges[key].remove((Edge))
-			else:	
-				hashMapParllelEdges[key].append(Edge)
-
-			if hashMapParllelEdges[key] == []:
-				del hashMapParllelEdges[key]
-
-	for key, value in hashMapParllelEdges.items():
-		boundaryEdges.append(value[0])
-
-
-	return 	boundaryEdges
-
-## Function adds Faces and vertexes into the list 
-## These addition Faces connect surface to the Boundary
-def getClosedSurface(Faces,X,Y,Z, boundaryEdges):
-
-	indexV= len(X)
-	# Zmin = float (-1.000000000000000000)
-	Zmin = float(min(Z) -0.000000000000000001)
-
-	for (pt1, pt2) in boundaryEdges:
-
-		## added (X,Y,Z) in the list at the end
-		X.append(X[pt1])
-		Y.append(Y[pt1])
-		Z.append(Zmin)
-
-		X.append(X[pt2])
-		Y.append(Y[pt2])
-		Z.append(Zmin)
-
-		## added two triangle which 
-
-		Faces.append([pt1, indexV, indexV+1])
-		Faces.append([pt1,pt2,indexV+1])
-
-		indexV+=2
-
-	return Faces,X,Y,Z
-
-#This function extract l, m ,n  from the string
-def getSlope(slope):
-
-	s= slope.split('.')
-	l=float(s[1])/10000000.0
-	m=float(s[2])/10000000.0
-	n=float(s[3])/1000000.0
-
-
-	if l==0 :
-		l=0.000001
-
-	if m ==0:
-		m=0.000001
-
-	if n==0:
-		n=0.000001
-
-	return l,m,n
-
-def checkIfSkew(A,B,slope):
-	isSkew=True
-	alpha = []
-	for i in range(3):
-		alpha.append((A[i]-B[i])/slope[i])
-
-	if (alpha[0]==alpha[1] and alpha[0]==alpha[2]):
-		isSkew=False
-
-	return bool(isSkew)
-
-#this function segregate the flase parllel(Skew Lines) and parllel lines
-def getSkewLines(X,Y,Z, parllelLinesList):
-
-	groupList=dict()
-	count=1
-
-	print(len(parllelLinesList))
-
-	farzi=None
-	maxP=1
-	
-	for slope,value in  parllelLinesList.items():
-
-		parlleLines=[]
-		parllelLines=value
-
-
-		l,m,n= getSlope(slope)
-
-		# print (farzi)
-		if maxP <= len(value):
-			maxP=len(value)
-			farzi=slope
-
-
-
-		for edge in parllelLines:
-
-			# print (type(parllelLines[i]))
-			# edge=parlleLines[i]
-			# print(edge)
-			break
-
-			if bool(groupList) == False:
-				groupList[count]=[edge]
-				count+=1
-				continue
-
-			isSkew =True
-
-			# print("in Parllel Lined loop")
-			#if edge is parllel to any of the element in group list 
-			for key, lines in groupList.items():
-
-				# print("creating an edge list")
-				Lines=[]
-				Lines=lines
-				# print(type(Lines))
-				baseEdge=Lines[0]
-				# print (type(baseEdge))
-
-				if checkIfSkew((X[baseEdge[0]],Y[baseEdge[0]],Z[baseEdge[0]]), (X[edge[0]],Y[edge[0]],Z[edge[0]]),(l,m,n)) == False:
-					groupList[key].append(edge)
-					isSkew = False
-					break
-
-			if isSkew == True:
-				groupList[count]=[edge]
-				count+=1
-
-	print(maxP)
-	print(parllelLinesList[farzi])
-	return groupList
-
-# Return dictionary of edges with same orienatation 
-def getIntervals( X,Y,Z, faces ):
-
-	intervals=dict()
-
-	maxEle=1
-
-	for i in range(len(X)):
-
-		face=Faces[i]
-		A=[0,1,0]
-		B=[1,2,2]
-
-		for j in range(3):
-			key= getKey(X,Y,Z ,face[A[j]],face[B[j]])
-
-			if key == "":
-				continue
-
-			interval =((i,int(A[j]), int (B[j])))
-
-			if  intervals.get(key) == None:
-				intervals[key] = [interval]
-				
-			else:
-				intervals[key].append(interval)
-				maxEle=max(maxEle,len(intervals[key]))
-				# print("sucked")
-
-	print (len(intervals),len(faces))
-	print ("maximum number of element in intervals", maxEle)
-	return intervals
-
-# Return the list of edge which are concurrent
-def getConcurrentEdges(interval,slope, faces, X, Y, Z):
-
-	s= slope.split('.')
-	l=float(s[1])/100000.0
-	m=float(s[2])/100000.0
-	n=float(s[3])/10000.0
-
-	if l==0 :
-		l=0.0001
-
-	if m ==0:
-		m=0.0001
-
-	if n==0:
-		n=0.0001
-	
-	parllelEdges=[]
-	parllelLines=0
-
-	for i,a,b in interval:
-
-		if len(parllelEdges)==0:
-			parllelEdges.append([(X[faces[i][a]],Y[faces[i][a]],Z[faces[i][a]],i,a,b)])
-			parllelLines +=1
-
-		else:
-			x=X[faces[i][a]]
-			y=Y[faces[i][a]]
-			z=Z[faces[i][a]]
-
-			countA=0
-			countB=0
-
-			for o in range(len(parllelEdges)):
-				
-				x1,y1,z1= parllelEdges[o][0][0:3]
-				e=float(x-x1)/l
-				f=float(y-y1)/m
-				g=float(z-z1)/n
-
-
-				if e!=0 and f!=0 and g!=0:
-					countA+=1
-				else:
-					countB+=1
-				# print (e,f,g)
-				# if e==f and e==g:
-				# 	parllelEdges[o].append((x,y,z,i,a,b))
-				# else:
-				# 	parllelEdges.append((x,y,z,i,a,b))
-
-			print ("countA", countA)
-	return parllelEdges
-
-#Return a Dictionary of boundary Points
-def getBoundaryPoints( X,Y,Z , faces):
-
-
-	intervals = getIntervals(X,Y,Z ,faces)
-
-	for slope,interval  in intervals.items():
-		x= getConcurrentEdges(interval, slope, faces, X,Y,Z)
-
-
-
-
-	## Expore the hash map and find the intervel wihch is partial occupied
 
 # Return Random list of y corrdinated for lines
 def getRandomLinesList( len,start=1,maxInterval=5):
@@ -866,30 +559,32 @@ def Test():
 
 if __name__ == '__main__':
 
-	Test()
+	# Test()
 	
+	reader = Reader.reader()
 	# Reading the vertices
-	# X, Y, Z = readVertexs("vertex_new.txt")
-	# print ("Number of Vertexs",len(X))
+	X, Y, Z = reader.readVertexes("vertex_new.txt")
+	print ("Number of Vertexs",len(X))
 
-	# #Reading triangle Vertexs
-	# Faces = (readFaces("face_new.txt"))
-	# print ("Number of triangular Faces",len(Faces))
+	#Reading triangle Vertexs
+	Faces = (reader.readFaces("face_new.txt"))
+	print ("Number of triangular Faces",len(Faces))
 
-	# #get the all possible Edges
-	# Edges = getEdges(Faces)
-	# print ("Total Number of Edges",len(Edges))
+	## Creating Surface DataType
+	surface = Surface.surface(X,Y,Z,Faces)
 
-	# #group edges based upon slope
-	# #Justified as the input file contains triangle which are non overlapping
-	# #Edges are not partialy shared
-	# boundaryEdges= getBoundaryEdges(X,Y,Z, Edges)
-	# print ("Total Number of Boundary Edges",len(boundaryEdges)) 
+	#get the all possible Edges
+	Edges = surface.getEdges()
+	print ("Total Number of Edges",len(Edges))
 
-	# # print(type(boundaryEdges))
-	# ## Rteurn the Closed Surface to the Face
-	# # Faces,X,Y,Z= getClosedSurface(Faces,X,Y,Z, boundaryEdges)
-	# # print("Total number of Faces ",len(Faces))
+
+	boundaryEdges= surface.getBoundaryEdges()
+	print ("Total Number of Boundary Edges",len(boundaryEdges)) 
+
+
+	surface.getExtendedSurfaceToBase( boundaryEdges)
+	print("Total number of Faces surface 1 ",len(surface.Faces))
+
 
 	# #######################################################################
 	# #working code 
@@ -972,24 +667,22 @@ if __name__ == '__main__':
 	# 	y=np.array(y)
 	# 	faces=np.array(Faces)
 
-	# # coverting to np arrays
-	# 	# x=np.concatenate((np.array(cordX), u), axis=0)
-	# 	# z=np.concatenate((np.array(cordZ), h), axis=0)
-	# 	# y=np.concatenate((np.array(cordY), v), axis=0)
-	# 	# faces=np.concatenate((simplices, faces), axis=0)
+	# coverting to np arrays
+		# x=np.concatenate((np.array(cordX), u), axis=0)
+		# z=np.concatenate((np.array(cordZ), h), axis=0)
+		# y=np.concatenate((np.array(cordY), v), axis=0)
+		# faces=np.concatenate((simplices, faces), axis=0)
 
-	# 	# print ( len(faces), len(cordX))
+		# print ( len(faces), len(cordX))
 
-	# fig1 = FF.create_trisurf(x=X, y=Y, z=Z,
+	# fig1 = FF.create_trisurf(x=surface.X, y=surface.Y, z=surface.Z,
 	# 							colormap = [(0.4, 0.15, 0), (1, 0.65, 0.12)],
 	# 							# color_func=,
-	# 							simplices=Faces,
+	# 							simplices=surface.Faces,
 	# 							title="Mobius Band",
 	# 							plot_edges=False,
 	# 							show_colorbar=False
 	# 							)
-
-	# print (fig1)
 
 	# py.plot(fig1, filename="face.html")
 
