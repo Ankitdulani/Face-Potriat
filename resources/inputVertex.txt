@@ -1,0 +1,10 @@
+ fileVertex=fopen('vertex.txt','wt')
+ for ii = 1: size(fine_result.vertex,1));
+ 	fprintf(fileVertex,'%20.18f,'fine_result.vertex(ii,:))
+ 	fprintf(fileVertex,'\n')
+
+
+ fileFace=fopen('Face.txt','wt')
+ for ii = 1: size(fine_result.face,1));
+ 	fprintf(fileVertex,'%20.18f,'fine_result.face(ii,:))
+ 	fprintf(fileVertex,'\n')
