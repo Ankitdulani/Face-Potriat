@@ -1,4 +1,5 @@
 import math
+from modules import Point
 
 class vector2D:
 
@@ -37,16 +38,75 @@ class vector3D:
 		self.y = y
 		self.z = z
 
-	def getVector3D(self,pt2, pt1):
+	def getVector3D( pt2, pt1):
 
-		self.x = pt1[0] - pt2[0]
-		self.y = pt1[1] - pt2[1]
-		self.z = pt1[2] - pt2[2]
+		vec = vector3D()
+		vec.x = pt1.x - pt2.x
+		vec.y = pt1.y - pt2.y
+		vec.z = pt1.z - pt2.z
+		return (vec)
 
-		return (getVector())
+	def crossProduct( vectorA, vectorB):
+
+		a = vectorA.y*vectorB.z - vectorA.z * vectorB.y
+		b =	vectorA.z*vectorB.x - vectorA.x * vectorB.z
+		c = vectorA.x*vectorB.y - vectorA.y * vectorB.x
+
+		return vector3D(a,b,c)
+
+	def dotProduct(self,vec):
+		return (self.x*vec.x + self.y*vec.y + self.z*vec.z)
+
+	def addVector(A,B):
+		return vector3D( A.x+B.x , A.y+B.y , A.z+B.z )
+
+	def subVector(A,B):
+		return vector3D( A.x-B.x , A.y-B.y , A.z-B.z )
+
+	def scalerMultpy(A, mag):
+		return vector3D( mag * A.x, mag * A.y, mag * A.z)
+
+	def vectorMultipy(A, B):
+		return vector3D( A.x*B.x , A.y*B.y , A.z*B.z)
+
+	def vecToIntegerPoint(self):
+		return Point.Point3D(int(round(self.x,0)) , int(round(self.y,0)) , int(round(self.z,0)))
+
+	def vecToPoints(self, decimal):
+		return Point.Point3D(round(self.x,decimal) , round(self.x,decimal) , round(self.x,decimal) )
 
 	def getVector(self):
 		return vector3D(self.x,self.y,self.z)
 
 	def printVector(self):
 		print ( self.x , self.y,self.z)	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,1 +1,0 @@
-class Plane3D:
