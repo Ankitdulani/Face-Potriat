@@ -1,17 +1,35 @@
 import math
+import numpy as np
 
 class surface:
 
-	def __init__ (self, X,Y,Z, Faces, colorMap =None):
+	def __init__ (self, X,Y,Z, Faces, texture = None):
 		
 		self.X = X
 		self.Y = Y
 		self.Z = Z
 
 		self.Faces = Faces
-		self.ColorMap = colorMap
+		self.Texture = texture
 
 		self.Edges = []
+
+	def convertTextureForFaces(self):
+
+		texture = self.Texture
+		index = 0
+		newTexture = []
+		
+		for face in self.Faces:
+
+			colorR = int ((texture[face[0]][0])) #+ texture[face[1]][0] + texture[face[2]][0])/3)
+			colorB = int ((texture[face[0]][1])) #+ texture[face[1]][1] + texture[face[2]][1])/3)
+			colorG = int ((texture[face[0]][2])) #+ texture[face[1]][2] + texture[face[2]][2])/3)
+
+			# print((colorR,colorG,colorB))
+			newTexture.append((colorR,colorG,colorB))
+
+		self.Texture = newTexture
 
 	# triangulagted faces are no overlapping
 	# Edges are also not Partially Shared

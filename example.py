@@ -4,6 +4,7 @@ import plotly.figure_factory as FF
 import plotly.graph_objs as go
 import math 
 import random
+import cv2
 import numpy as np
 from PIL import Image
 from operator import itemgetter
@@ -16,17 +17,64 @@ from modules import Plane
 from modules import Voxeliser
 from modules import BresenhamAlgo
 
-
 # Return Random list of y corrdinated for lines
-def getRandomLinesList( len,start=1,maxInterval=5):
+def getRandomLinesList( len,start=1,maxInterval=10):
 
 	randomLines=[]
 	x = start
-	while x < len + start:
-		randomLines.append(x)
-		x+= random.randrange(0,maxInterval,1)
+	maxWidth = 8 
+	while x < len + start - maxWidth:
+		width = random.randrange(1,maxWidth,1)
+		while width:
+			randomLines.append(x)
+			width -=1
+			x += 1
+		x+= random.randrange(1,maxInterval,1)
+
 
 	return randomLines
+
+# Testig the texture being being copied
+def testTexture(surface,l=900,b=1000,h =1000):
+
+	img = np.zeros((l,b,3),dtype = np.uint8)
+	disp = np.zeros((l,b),dtype = int)
+	img.fill(255)
+
+	X = surface.X
+	Y = surface.Y
+	Z = surface.Z
+
+	minVector = vector.vector3D(float(-1),float(-1),float(-1))
+	maxZ = max(Z)
+	ScaleVector = vector.vector3D(int ( b / float(2)),int ( l / float(2)),int ( h/(maxZ - float(-1))))
+
+	for i in range( len(X)):
+		vec1 = vector.vector3D(X[i],Y[i],Z[i])
+		vec1 = vector.vector3D.vectorMultipy(ScaleVector,vector.vector3D.subVector(vec1,minVector))
+		pt1 = vec1.vecToIntegerPoint()
+
+		if disp[l-1-pt1.y][b-1-pt1.x] < pt1.z:
+			disp[l-1-pt1.y][b-1-pt1.x] = pt1.z
+			img[l-1-pt1.y][b-1-pt1.x] = surface.Texture[i]
+
+
+
+	return img
+
+def BlackAndWhite (img , threshold =100):
+
+	# l = img.shape[0]
+	# b = img.shape[1]
+
+	# for i in range (l):
+	# 	for j in range (b):
+	# 		if img [l-1-i][b-j-1] > np.uint8(threshold):
+	# 			img [l-1-i][b-j-1] = np.uint8(255) 
+
+	img = cv2.adaptiveThreshold(img,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C,cv2.THRESH_BINARY,5,5)
+
+	return img
 
 # For Creating Testing Example
 def createTestDisplacementMap( key, l=900,b=900):	
@@ -96,7 +144,7 @@ def makeGray ( img , displacementMap):
 	return img
 
 # Function which creates the Art
-def createArt(displacementMap, scale =0.25):
+def createArt(displacementMap, img , scale =0.25  ):
 
 	print ("Create Art being called")
 
@@ -108,15 +156,12 @@ def createArt(displacementMap, scale =0.25):
 	l = int(displacementMap.shape[0])
 	b = int(displacementMap.shape[1])
 
-	img = np.zeros((l,b) ,dtype = np.uint8)
-	img.fill(255)
-
 	# img = testDisplacementMap (displacementMap)
 	# img = makeGray (img, displacementMap)
 
 	start = 1
 
-	randomLines = getRandomLinesList(len=l-start -1, start= start, maxInterval = 6)
+	randomLines = getRandomLinesList(len=l-start -1, start= start)
 
 	print ("length of randomLines",len (randomLines))
 
@@ -175,6 +220,7 @@ def createArt(displacementMap, scale =0.25):
 	
 	return img
 
+
 # Testing 
 def Test():
 
@@ -215,6 +261,7 @@ def Test():
 	img = Image.fromarray(Art)
 	img.save ('createArtTestOutput.png')
 
+
 if __name__ == '__main__':
 
 	Test()
@@ -223,7 +270,6 @@ if __name__ == '__main__':
 	# This variable intiates html display of surafce using plotly
 	DisplaySurface = False
 
-	
 	reader = Reader.reader()
 	# Reading the vertices
 	X, Y, Z = reader.readVertexes("vertex_new.txt")
@@ -233,8 +279,26 @@ if __name__ == '__main__':
 	Faces = (reader.readFaces("face_new.txt"))
 	print ("Number of triangular Faces",len(Faces))
 
+	#Read Texture File
+	#Input texture file marks color for each vertex file
+	Texture = reader.readTexture("texture.txt")
+	print ("Length of texture File",len(Texture)) 
+
 	## Creating Surface DataType
-	surface = Surface.surface(X,Y,Z,Faces)
+	surface = Surface.surface(X,Y,Z,Faces,texture=Texture)
+
+	### test the tesxture
+	Art = testTexture(surface)
+	img = Image.fromarray(Art)
+	img.save ('TextureTestOutput.png')
+
+
+
+	## Coverting the texture for vertexes to Faces
+	# surface.convertTextureForFaces()
+	# print ("Length of new texture File",len(surface.Texture)) 
+
+	# print(surface.Texture)
 
 	#get the all possible Edges
 	# Edges = surface.getEdges()
@@ -247,17 +311,31 @@ if __name__ == '__main__':
 	# print("Total number of Faces surface 1 ",len(surface.Faces))
 
 
-	disparityMap = Voxeliser.Voxeliser.getDisparitytMap(surface)
+	disparityMap, graScaleImage = Voxeliser.Voxeliser.getDisparitytMap(surface)
 	print ("disparity Map Shape",disparityMap.shape)
+
+	## Grascale to Black and white
+	# graScaleImage = BlackAndWhite(graScaleImage)
 
 	## Verifying the Voxelisation visually
 	Art=testDisplacementMap(disparityMap)
+
+	img = Image.fromarray(graScaleImage)
+	img.save ('graScaleImage.png')
+
+
 	img = Image.fromarray(Art)
 	img.save ('DisplacemntMapFace.png')
 
+	grayScale = bool(True)
+
+	if grayScale == False:
+		graScaleImage = np.zeros((l,b) ,dtype = np.uint8)
+		graScaleImage.fill(255)
+
 
 	#### Creating the Art
-	Art = createArt(displacementMap = disparityMap)
+	Art = createArt(displacementMap = disparityMap, img = graScaleImage )
 
 	#### Display the image
 	img = Image.fromarray(Art)
@@ -267,7 +345,8 @@ if __name__ == '__main__':
 	if DisplaySurface == True:
 
 		fig1 = FF.create_trisurf(x=surface.X, y=surface.Y, z=surface.Z,
-									colormap = [(0.4, 0.15, 0), (1, 0.65, 0.12)],
+									color_func = surface.Texture,
+									# colormap = [(0.4, 0.15, 0), (1, 0.65, 0.12)],
 									simplices=surface.Faces,
 									title="Mobius Band",
 									plot_edges=False,
