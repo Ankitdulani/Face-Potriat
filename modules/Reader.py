@@ -36,9 +36,23 @@ class reader:
 		Faces=[]
 		for i in range(len(A)):
 			face=[]
-			face.append(int(A[i]))
-			face.append(int(B[i]))
-			face.append(int(C[i]))
+			face.append(int(A[i])-1)
+			face.append(int(B[i])-1)
+			face.append(int(C[i])-1)
 			Faces.append(face)
 
 		return Faces
+
+	def readTexture(self,fileName):
+
+		A,B,C =self.readVertexes(fileName)
+
+		texture =[]
+		for i in range(len(A)):
+			colors=[]
+			colors.append(int(A[i]))
+			colors.append(int(B[i]))
+			colors.append(int(C[i]))
+			texture.append(colors)
+
+		return texture
