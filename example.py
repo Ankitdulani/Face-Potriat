@@ -22,14 +22,20 @@ def getRandomLinesList( len,start=1,maxInterval=10):
 
 	randomLines=[]
 	x = start
-	maxWidth = 8 
+	maxWidth =5 
+	minWidth = 1
 	while x < len + start - maxWidth:
-		width = random.randrange(1,maxWidth,1)
-		while width:
-			randomLines.append(x)
-			width -=1
-			x += 1
-		x+= random.randrange(1,maxInterval,1)
+		width = random.randrange(minWidth,maxWidth,1)
+		randomLines.append(x)
+		randomLines.append(x+width)
+
+		x += width
+
+		# while width:
+		# 	randomLines.append(x)
+		# 	width -=1
+		# 	x += 1
+		x+= random.randrange(2,maxInterval,1)
 
 
 	return randomLines
@@ -54,9 +60,9 @@ def testTexture(surface,l=900,b=1000,h =1000):
 		vec1 = vector.vector3D.vectorMultipy(ScaleVector,vector.vector3D.subVector(vec1,minVector))
 		pt1 = vec1.vecToIntegerPoint()
 
-		if disp[l-1-pt1.y][b-1-pt1.x] < pt1.z:
-			disp[l-1-pt1.y][b-1-pt1.x] = pt1.z
-			img[l-1-pt1.y][b-1-pt1.x] = surface.Texture[i]
+		if disp[l-1-pt1.y][pt1.x] < pt1.z:
+			disp[l-1-pt1.y][pt1.x] = pt1.z
+			img[l-1-pt1.y][pt1.x] = surface.Texture[i]
 
 
 
@@ -159,15 +165,18 @@ def createArt(displacementMap, img , scale =0.25  ):
 	# img = testDisplacementMap (displacementMap)
 	# img = makeGray (img, displacementMap)
 
+	previousY = np.zeros( b ,dtype = int)
+
 	start = 1
+	count = 0
 
 	randomLines = getRandomLinesList(len=l-start -1, start= start)
 
 	print ("length of randomLines",len (randomLines))
 
-	for i in randomLines:
+	for i in range(len(randomLines)):
 
-		currY = i
+		currY = randomLines[i]
 		prevY = currY
 
 		prevX = 0
@@ -177,6 +186,10 @@ def createArt(displacementMap, img , scale =0.25  ):
 		currZ = None
 
 		left = 0.0
+
+		if i % 2 ==0:
+			previousY.fill(0)
+			count +=1
 
 		while currX < b:
 			
@@ -188,12 +201,19 @@ def createArt(displacementMap, img , scale =0.25  ):
 				prevY = currY
 				prevZ = currZ
 				currX+=1
+				
+
+			if i%2 == 0:
+				previousY[currX]=currY
+			else:
+				img = BresenhamAlgo.bresenhamLine.drawLine(img,[(currX,currY),(currX,previousY[currX])])
+
+			if currX == 0:
 				continue
 
 			#create a line prev to current 
 			# img[currY][currX]=np.uint8(0)
-			img = BresenhamAlgo.bresenhamLine.drawLine(img,[(currX,currY),(prevX,prevY)])
-
+			
 			#### Need modification
 			#### Reason it depends upon the slope of boundary 
 			##### If slope is < 1 than damper should be adjusted according
@@ -217,7 +237,7 @@ def createArt(displacementMap, img , scale =0.25  ):
 
 			prevZ = currZ
 
-	
+	print("intialised to zero",count)
 	return img
 
 
@@ -251,16 +271,16 @@ def Test():
 	Art = BresenhamAlgo.bresenhamLine.drawLine(img,Point.Point2D(300,700),Point.Point3D(200,600))
 
 	##### Display the image
-	img = Image.fromarray(Art)
-	img.save ('bresenhamLine.png')
+	testWriter = Reader.writer()
+	testWriter.writeImage('bresenhamLine_1.png',Art)
+	# img = Image.fromarray(Art)
+	# img.save ('bresenhamLine.png')
 
 	#### Testing the create Art Algorithm
 	displacementMap = createTestDisplacementMap(key ="hemisphere")
 	
 	Art = testDisplacementMap(displacementMap)
-	img = Image.fromarray(Art)
-	img.save ('createArtTestOutput.png')
-
+	testWriter.writeImage('createArtTestOutput_1.png',Art)
 
 if __name__ == '__main__':
 
@@ -268,7 +288,10 @@ if __name__ == '__main__':
 	print ("testing Over")
 
 	# This variable intiates html display of surafce using plotly
-	DisplaySurface = False
+	DisplaySurface = bool(False)
+	grayScale = bool(True)
+
+	Writer = Reader.writer()
 
 	reader = Reader.reader()
 	# Reading the vertices
@@ -289,10 +312,7 @@ if __name__ == '__main__':
 
 	### test the tesxture
 	Art = testTexture(surface)
-	img = Image.fromarray(Art)
-	img.save ('TextureTestOutput.png')
-
-
+	Writer.writeImage('TextureTestOutput.png',Art)
 
 	## Coverting the texture for vertexes to Faces
 	# surface.convertTextureForFaces()
@@ -319,18 +339,13 @@ if __name__ == '__main__':
 
 	## Verifying the Voxelisation visually
 	Art=testDisplacementMap(disparityMap)
+	Writer.writeImage('graScaleImage_1.png',graScaleImage)
 
-	img = Image.fromarray(graScaleImage)
-	img.save ('graScaleImage.png')
+	Writer.writeImage('DisplacemntMapFace_1.png',Art)
 
-
-	img = Image.fromarray(Art)
-	img.save ('DisplacemntMapFace.png')
-
-	grayScale = bool(True)
 
 	if grayScale == False:
-		graScaleImage = np.zeros((l,b) ,dtype = np.uint8)
+		graScaleImage = np.zeros((graScaleImage.shape[0],graScaleImage.shape[1]) ,dtype = np.uint8)
 		graScaleImage.fill(255)
 
 
@@ -338,15 +353,13 @@ if __name__ == '__main__':
 	Art = createArt(displacementMap = disparityMap, img = graScaleImage )
 
 	#### Display the image
-	img = Image.fromarray(Art)
-	img.save ('FacePotrait.png')
-
+	Writer.writeImage('FacePotrait_3.png',Art)
 
 	if DisplaySurface == True:
 
 		fig1 = FF.create_trisurf(x=surface.X, y=surface.Y, z=surface.Z,
-									color_func = surface.Texture,
-									# colormap = [(0.4, 0.15, 0), (1, 0.65, 0.12)],
+									# color_func = surface.Texture,
+									colormap = [(0.4, 0.15, 0), (1, 0.65, 0.12)],
 									simplices=surface.Faces,
 									title="Mobius Band",
 									plot_edges=False,

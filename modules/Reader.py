@@ -1,5 +1,6 @@
 import os.path
 from pathlib import Path
+from PIL import Image
 class reader:
 
 	def __init__(self):
@@ -9,7 +10,6 @@ class reader:
 		path=Path(os.getcwd())
 		os.chdir(self.currentPath)
 		self.pathResource = path
-
 		print ("** Reader Intiatlised **")
 
 	def readVertexes(self, fileName):
@@ -56,3 +56,27 @@ class reader:
 			texture.append(colors)
 
 		return texture
+
+
+class writer:
+	"""docstring for write"""
+	def __init__(self):
+
+		self.currentPath=os.getcwd()
+		os.chdir('results')
+		pathNew=Path(os.getcwd())
+		os.chdir(self.currentPath)
+		self.pathResult = pathNew
+		
+	def writeImage (self,fileName,result):
+
+		filePath = self.pathResult / fileName
+		img = Image.fromarray(result)
+		img.save (filePath)
+
+
+
+
+
+
+

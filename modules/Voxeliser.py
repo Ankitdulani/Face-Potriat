@@ -137,9 +137,9 @@ class Voxeliser:
 
 			for (x,y,z) in points:
 				value = int ( z )
-				if value > disparityMap[l-1-y][b-1-x]:
-					disparityMap[l-1-y][b-1-x]= value
-					graScaleImage[l-1-y][b-1-x] = colorValue
+				if value > disparityMap[l-1-y][x]:
+					disparityMap[l-1-y][x]= value
+					graScaleImage[l-1-y][x] = colorValue
 
 		return disparityMap, graScaleImage
 
