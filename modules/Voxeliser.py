@@ -100,8 +100,9 @@ class Voxeliser:
 
 		# Displacement Map for size (x,y)
 		disparityMap = np.zeros((l,b) ,dtype = float)
-		graScaleImage = np.zeros((l,b) ,dtype = np.uint8)
-		graScaleImage.fill(255)
+
+		colorImage = np.zeros((l,b,3) ,dtype = np.uint8)
+		colorImage.fill(255)
 
 		minVector = vector.vector3D(float(-1),float(-1),float(-1))
 		maxZ = max(Z)
@@ -113,8 +114,8 @@ class Voxeliser:
 
 		for face in Faces:
 
-			colorValue = int((Texture[face[2]][0]+ Texture[face[2]][1]+Texture[face[2]][2])/3)
-
+			# colorValue = int((Texture[face[2]][0]+ Texture[face[2]][1]+Texture[face[2]][2])/3)
+			colorValue = [Texture[face[2]][0],Texture[face[2]][1],Texture[face[2]][2]]
 			# print(colorValue)
 			
 			vec1 = vector.vector3D(X[face[0]],Y[face[0]],Z[face[0]])
@@ -139,9 +140,9 @@ class Voxeliser:
 				value = int ( z )
 				if value > disparityMap[l-1-y][x]:
 					disparityMap[l-1-y][x]= value
-					graScaleImage[l-1-y][x] = colorValue
+					colorImage[l-1-y][x] = colorValue
 
-		return disparityMap, graScaleImage
+		return disparityMap, colorImage
 
 
 

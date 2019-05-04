@@ -16,6 +16,7 @@ from modules import Surface
 from modules import Plane
 from modules import Voxeliser
 from modules import BresenhamAlgo
+from modules import imageProcessing as processor
 
 # Return Random list of y corrdinated for lines
 def getRandomLinesList( len,start=1,maxInterval=10):
@@ -154,6 +155,10 @@ def createArt(displacementMap, img , scale =0.25  ):
 
 	print ("Create Art being called")
 
+	isColor = False
+	if len(img.shape) >= 3:
+		isColor = True
+
 	scaleA = 0.25
 	scaleB = 0.2
 
@@ -284,12 +289,13 @@ def Test():
 
 if __name__ == '__main__':
 
-	Test()
-	print ("testing Over")
+	# Test()
+	# print ("testing Over")
 
 	# This variable intiates html display of surafce using plotly
 	DisplaySurface = bool(False)
-	grayScale = bool(True)
+	backgroundImage = bool(True)
+	outputImage = "nonColored"
 
 	Writer = Reader.writer()
 
@@ -331,26 +337,36 @@ if __name__ == '__main__':
 	# print("Total number of Faces surface 1 ",len(surface.Faces))
 
 
-	disparityMap, graScaleImage = Voxeliser.Voxeliser.getDisparitytMap(surface)
+	disparityMap, colorImage = Voxeliser.Voxeliser.getDisparitytMap(surface)
 	print ("disparity Map Shape",disparityMap.shape)
 
-	## Grascale to Black and white
+	Writer.writeImage('Potrait.png',colorImage)
+
+	grayScaleImage = processor.IP.convertColorToGrayscale(colorImage)
+
+	# Grascale to Black and white
 	# graScaleImage = BlackAndWhite(graScaleImage)
 
 	## Verifying the Voxelisation visually
 	Art=testDisplacementMap(disparityMap)
-	Writer.writeImage('graScaleImage_1.png',graScaleImage)
 
+	Writer.writeImage('graScaleImage_1.png',grayScaleImage)
 	Writer.writeImage('DisplacemntMapFace_1.png',Art)
 
 
-	if grayScale == False:
-		graScaleImage = np.zeros((graScaleImage.shape[0],graScaleImage.shape[1]) ,dtype = np.uint8)
-		graScaleImage.fill(255)
+	if backgroundImage == False:
+		baseImage.fill(255)
+	else:
+		if outputImage == "colored":
+			baseImage = colorImage
+		else:
+			baseImage = grayScaleImage
+
+
 
 
 	#### Creating the Art
-	Art = createArt(displacementMap = disparityMap, img = graScaleImage )
+	Art = createArt(displacementMap = disparityMap, img = baseImage )
 
 	#### Display the image
 	Writer.writeImage('FacePotrait_3.png',Art)
