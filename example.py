@@ -249,53 +249,86 @@ def createArt(displacementMap, img , scale =0.25  ):
 # Testing 
 def Test():
 
-	print ("**** Testing ****")
-	ptA = Point.Point3D(4,0,0)
-	ptB = Point.Point3D(0,4,0)
-	ptC = Point.Point3D(0,0,4)
 
-	newPlane = Plane.Plane3D.getPlaneEquation( ptA , ptB , ptC)
-	newPlane.printEquation()
+	# print( Point.Point3D.getCentroid([(1,2,3),(2,3,4),(3,4,5)]))
+	# normal = vector.vector3D(0,1,0)
+	# incidentRay = vector.vector3D(3,-4,0)
 
-	## Test the vector2D 
-	A= vector.vector2D(3,0)
-	mod = A.getModulus()
-	A = A.unitVector()
-	A = A.scaledVector(5)
-	A = A.addVector(vector.vector2D(0,3))
-	A.printVector()
-	print( mod)
+	# reflected = vector.vector3D.getReflectedVector(normal , incidentRay)
 
-	## Testing the vector 3D
-	B = vector.vector3D(3,2,0)
-	B.printVector()
+	# reflected.printVector()
 
-	###### Testing bresenham Line
-	img = np.zeros((900,900) ,dtype = np.uint8)
-	img.fill(255)
-	Art = BresenhamAlgo.bresenhamLine.drawLine(img,Point.Point2D(300,700),Point.Point3D(200,600))
 
-	##### Display the image
-	testWriter = Reader.writer()
-	testWriter.writeImage('bresenhamLine_1.png',Art)
-	# img = Image.fromarray(Art)
-	# img.save ('bresenhamLine.png')
+	## testing Voxelisation 
 
-	#### Testing the create Art Algorithm
-	displacementMap = createTestDisplacementMap(key ="hemisphere")
+	X = [-0.2 , 0.0 , 0.2] 
+	Y = [-0.2, 0.4 , -0.2]
+	Z = [0.0 , 0.0 , 0.0]
+
+	face = [[ 0 ,1 ,2]]
+	texture = [[200,0 ,0]]
+
+	surface = Surface.surface(X,Y,Z,face,texture)
+
+
+	disparityMap, colorImage, IntensityMap = Voxeliser.Voxeliser.getDisparitytMap(surface)
+
+	Writer = Reader.writer()
+
+	Writer.writeImage('Potrait.png',colorImage)
+	# Writer.writeImage('Potrait.png',disparityMap)
+	Writer.writeImage('IM.png',IntensityMap)
+
+
+	# print ("**** Testing ****")
+	# ptA = Point.Point3D(4,0,0)
+	# ptB = Point.Point3D(0,4,0)
+	# ptC = Point.Point3D(0,0,4)
+
+	# newPlane = Plane.Plane3D.getPlaneEquation( ptA , ptB , ptC)
+	# newPlane.printEquation()
+
+	# ## Test the vector2D 
+	# A= vector.vector2D(3,0)
+	# mod = A.getModulus()
+	# A = A.unitVector()
+	# A = A.scaledVector(5)
+	# A = A.addVector(vector.vector2D(0,3))
+	# A.printVector()
+	# print( mod)
+
+	# ## Testing the vector 3D
+	# B = vector.vector3D(3,2,0)
+	# B.printVector()
+
+	# ###### Testing bresenham Line
+	# img = np.zeros((900,900) ,dtype = np.uint8)
+	# img.fill(255)
+	# Art = BresenhamAlgo.bresenhamLine.drawLine(img,Point.Point2D(300,700),Point.Point3D(200,600))
+
+	# ##### Display the image
+	# testWriter = Reader.writer()
+	# testWriter.writeImage('bresenhamLine_1.png',Art)
+	# # img = Image.fromarray(Art)
+	# # img.save ('bresenhamLine.png')
+
+	# #### Testing the create Art Algorithm
+	# displacementMap = createTestDisplacementMap(key ="hemisphere")
 	
-	Art = testDisplacementMap(displacementMap)
-	testWriter.writeImage('createArtTestOutput_1.png',Art)
+	# Art = testDisplacementMap(displacementMap)
+	# testWriter.writeImage('createArtTestOutput_1.png',Art)
 
 if __name__ == '__main__':
 
 	# Test()
 	# print ("testing Over")
 
+
+
 	# This variable intiates html display of surafce using plotly
 	DisplaySurface = bool(False)
 	backgroundImage = bool(True)
-	outputImage = "nonColored"
+	outputImage = "colored"
 
 	Writer = Reader.writer()
 
@@ -337,21 +370,21 @@ if __name__ == '__main__':
 	# print("Total number of Faces surface 1 ",len(surface.Faces))
 
 
-	disparityMap, colorImage = Voxeliser.Voxeliser.getDisparitytMap(surface)
+	disparityMap, colorImage, IntensityMap = Voxeliser.Voxeliser.getDisparitytMap(surface)
 	print ("disparity Map Shape",disparityMap.shape)
-
 	Writer.writeImage('Potrait.png',colorImage)
+	
+	colorImageLight = processor.IP.addIntensityMap(colorImage, IntensityMap)
+	Writer.writeImage('IntensityMap_Art.png',colorImageLight)
 
+	
 	grayScaleImage = processor.IP.convertColorToGrayscale(colorImage)
-
-	# Grascale to Black and white
-	# graScaleImage = BlackAndWhite(graScaleImage)
+	Writer.writeImage('graScaleImage_1.png',grayScaleImage)
 
 	## Verifying the Voxelisation visually
 	Art=testDisplacementMap(disparityMap)
-
-	Writer.writeImage('graScaleImage_1.png',grayScaleImage)
 	Writer.writeImage('DisplacemntMapFace_1.png',Art)
+
 
 
 	if backgroundImage == False:
@@ -362,14 +395,14 @@ if __name__ == '__main__':
 		else:
 			baseImage = grayScaleImage
 
-
-
-
 	#### Creating the Art
 	Art = createArt(displacementMap = disparityMap, img = baseImage )
-
 	#### Display the image
-	Writer.writeImage('FacePotrait_3.png',Art)
+	Writer.writeImage('FacePotrait_6.png',Art)
+
+	Art = processor.IP.addIntensityMap(Art, IntensityMap)
+	Writer.writeImage('FacePotrait_8.png',Art)
+
 
 	if DisplaySurface == True:
 

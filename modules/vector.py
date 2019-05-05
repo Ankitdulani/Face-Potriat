@@ -46,6 +46,17 @@ class vector3D:
 		vec.z = pt1.z - pt2.z
 		return (vec)
 
+	def getMagnitude ( self):
+		return math.sqrt( self.x **2 + self.y **2 + self.z **2)
+
+	def getUnitVector(A):
+
+		mag = A.getMagnitude()
+		if mag == float(0):
+			return (vector3D())
+
+		return vector3D(A.x/mag, A.y/mag , A.z/mag)
+
 	def crossProduct( vectorA, vectorB):
 
 		a = vectorA.y*vectorB.z - vectorA.z * vectorB.y
@@ -79,7 +90,28 @@ class vector3D:
 		return vector3D(self.x,self.y,self.z)
 
 	def printVector(self):
-		print ( self.x , self.y,self.z)	
+		print ( self.x , self.y, self.z)	
+
+
+	def getCos(A, B):
+
+		A = vector3D.getUnitVector(A)
+		B = vector3D.getUnitVector(B)
+
+		return A.dotProduct(B)
+
+	def getReflectedVector(normal , incident):
+
+		normal = vector3D.getUnitVector(normal)
+		cos = vector3D.getCos( incident, normal)
+
+		magnitute = incident.getMagnitude()
+
+		vecReflectedAlongNormal = vector3D.scalerMultpy(normal, float(-2)*cos * magnitute )
+		
+		return vector3D.addVector(incident, vecReflectedAlongNormal)
+
+
 
 
 

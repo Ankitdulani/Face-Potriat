@@ -5,6 +5,7 @@ from modules import vector
 from modules import Plane
 from modules import Line
 from modules import Surface
+from modules import color
 import operator
 
 class Voxeliser:
@@ -88,11 +89,27 @@ class Voxeliser:
 
 		return points
 
-	def getDisparitytMap( surface,l=900,b=1000,h =1000, functionPLane ="XY"):
+	def getColorEquation(plane, colorA, colorB, colorC):
+
+		constantR = vector.vector3D(colorA.r , colorB.r , colorC.r).dotProduct(plane.normalVec)
+		constantG = vector.vector3D(colorA.g , colorB.g , colorC.g).dotProduct(plane.normalVec)
+		constantB = vector.vector3D(colorA.b , colorB.b , colorC.b).dotProduct(plane.normalVec)
+
+	def getDisparitytMap( surface,l=1000,b=1000,h =1000, functionPLane ="XY"):
+
+
+		## Variable for Light 
+		cameraPos = vector.vector3D( b/2 , l/2 , h )
+		cameraDir = vector.vector3D( 0 , 0 , -1 )
+
+		lightSource = vector.vector3D(  b/2 , l/2 , h )
+		LightPower = 200000
+
 
 		X = surface.X
 		Y = surface.Y
 		Z = surface.Z
+
 
 		Faces = surface.Faces
 
@@ -101,6 +118,10 @@ class Voxeliser:
 		# Displacement Map for size (x,y)
 		disparityMap = np.zeros((l,b) ,dtype = float)
 
+		# Intesity of Light to give effect of Shadders 
+		LightMap = np.zeros((l,b), dtype = float)
+		LightMap.fill(1)
+
 		colorImage = np.zeros((l,b,3) ,dtype = np.uint8)
 		colorImage.fill(255)
 
@@ -108,14 +129,12 @@ class Voxeliser:
 		maxZ = max(Z)
 
 		#Scale Factor
-		ScaleVector = vector.vector3D(int ( b / float(2)),int ( l / float(2)),int ( h/(maxZ - float(-1))))
-
+		ScaleVector = vector.vector3D(int ( b / float(2)),int ( l / float(2)),int ( h/(float(2))))
 		i = 0
-
 		for face in Faces:
 
 			# colorValue = int((Texture[face[2]][0]+ Texture[face[2]][1]+Texture[face[2]][2])/3)
-			colorValue = [Texture[face[2]][0],Texture[face[2]][1],Texture[face[2]][2]]
+			colorValue = [Texture[face[0]][0],Texture[face[0]][1],Texture[face[0]][2]]
 			# print(colorValue)
 			
 			vec1 = vector.vector3D(X[face[0]],Y[face[0]],Z[face[0]])
@@ -130,19 +149,60 @@ class Voxeliser:
 			pt2 = vec2.vecToIntegerPoint()
 			pt3 = vec3.vecToIntegerPoint()
 
+
 			plane = Plane.Plane3D.getPlaneEquation( pt1, pt2 , pt3)
+
+
+			## there are differenet type of Light,
+			# Diffussed Light = 1/r^2 * Intensity * cosq
+			# Ambient Light (from multiple reflection) = constant
+			# specular light (where maximum reflection happens ) = cos(E ^ R) ^ 5 and Intensity
+			# Follow http://www.opengl-tutorial.org/beginners-tutorials/tutorial-8-basic-shading/
+			
+			# to ease the computation will consider Centroid
+			pos = Point.Point3D.getCentroid([pt1,pt2,pt3]).pointToVec()
+
+
+			incidentRay = vector.vector3D.subVector(pos, lightSource)
+
+			distance = incidentRay.getMagnitude()
+
+			# Ambient Light 
+			IntensityA = float (0.1)
+
+			# Diffused Light 
+			IntensityD = 1* ( LightPower * vector.vector3D.getCos(plane.normalVec,incidentRay))/(distance ** 2)
+
+
+			reflectedRay = vector.vector3D.getReflectedVector(plane.normalVec, incidentRay)
+
+			# Specualae Light 
+			IntensityS = 1*( LightPower * (vector.vector3D.getCos(cameraDir,reflectedRay)** 5) )/(distance ** 2) 
+
+			# print (IntensityA,IntensityD,IntensityS)
+
+			Intensity =IntensityS + IntensityD + IntensityA
+
 
 			points = Voxeliser.getPointInsideTriangle(plane, pt1 , pt2 , pt3 )
 
+			# print (Intensity)
 			# print (len(points))
 
 			for (x,y,z) in points:
 				value = int ( z )
 				if value > disparityMap[l-1-y][x]:
+
+
 					disparityMap[l-1-y][x]= value
 					colorImage[l-1-y][x] = colorValue
+					# colorImage[l-1-y][x] = [np.uint8(abs(colorValue[0]*Intensity)),np.uint8(abs(colorValue[1]*Intensity)),np.uint8(abs(colorValue[2]*Intensity))]
+					## Plane is not computed prooperly
+					Intensity = abs(Intensity)
+					LightMap [l-1-y][x] = Intensity if Intensity <1 else 1
+					# LightMap [l-1-y][x] =  np.uint8(abs(Intensity*100))
 
-		return disparityMap, colorImage
+		return disparityMap, colorImage, LightMap
 
 
 

@@ -30,7 +30,19 @@ class Point3D:
 	def pointToVec(self):
 		return vector.vector3D(self.x , self.y , self.z) 
 
+	def addPoint(self, pt):
+		return Point3D(self.x+pt.x, self.y+pt.y , self.z+pt.z)
 
 	def print(self):
 
 		(self.pointToVec()).printVector()
+
+	def getCentroid(Points):
+
+		pt = Point3D()
+		for point in Points:
+			pt = pt.addPoint(point)
+
+		n = len (Points)
+
+		return Point3D( int(pt.x/n) , int (pt.y/n) , int (pt.z/n))
