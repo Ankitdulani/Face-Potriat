@@ -1,8 +1,8 @@
 # Face-Potriat
 
-There is a Saying "You Dont take a Photograph you make it" and here it is... <br>
+There is a Saying "**You Dont take a Photograph you make it" and here it is...** <br>
 
-Face-Potrait is an attempt to create Art using Code(AAS - Art As Code).This repository include alot of algorithms from Image Processing, Voxelisation, 3D Mathematics and what not.
+Face-Potrait is an attempt to create Art using Code(AAS - Art As Code).This repository uses of algorithms from Image Processing, Voxelisation, 3D Mathematics and what not.
 
 
 To Run the code.
