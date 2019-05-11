@@ -11,8 +11,10 @@ class Plane3D:
 
 		plane = Plane3D()
 
-		vectorA = vector.vector3D.getVector3D(pt3,pt1)
-		VectorB = vector.vector3D.getVector3D(pt2,pt1)
+		pt1, pt2, pt3 = Plane3D.sortPoints(pt1,pt2,pt3)
+
+		vectorA = vector.vector3D.getVector3D(pt2,pt1)
+		VectorB = vector.vector3D.getVector3D(pt3,pt1)
 
 		plane.normalVec = vector.vector3D.crossProduct(vectorA,VectorB)
 
@@ -58,3 +60,19 @@ class Plane3D:
 			return float(0)
 
 		return float(-1* (val/self.normalVec.y))
+
+	def sortPoints( pt1, pt2, pt3):
+
+		if pt1.x > pt2.x:
+			pt1 , pt2 = Plane3D.swapPoint(pt1, pt2)
+
+		if pt1.x > pt3.x:
+			pt1 , pt3 = Plane3D.swapPoint(pt1, pt3)
+
+		if pt2.y > pt3.y:
+			pt2 , pt3 = Plane3D.swapPoint(pt2,pt3)
+
+		return pt1, pt2, pt3 
+
+	def swapPoint(A,B):
+		return B,A

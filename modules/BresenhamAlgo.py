@@ -12,6 +12,10 @@ class bresenhamLine:
 
 		vertexes =[] 
 
+		isColor = False
+		if len(img.shape) >= 3:
+			isColor = True
+
 		if len(argv) > 2:
 			return img
 
@@ -55,15 +59,15 @@ class bresenhamLine:
 
 			### Slope less than 1
 			if flag == True :
-				img[ y1 + count][x1+i] = np.uint8(0)
+				img[ y1 + count][x1+i] = np.uint8(0) if isColor == False else np.zeros(3 , dtype = np.uint8)
 
 			### slope greater than 1
 			else:
 				#### slope negative check 
 				if slopenegative == False:
-					img [y2 - i][x2 - count] = np.uint8(0)
+					img [y2 - i][x2 - count] = np.uint8(0) if isColor == False else np.zeros(3 , dtype = np.uint8)
 				else:
-					img [y2 +i ][x2 - count] = np.uint8(0)
+					img [y2 +i ][x2 - count] = np.uint8(0) if isColor == False else np.zeros(3 , dtype = np.uint8)
 
 
 			if p >=0:
