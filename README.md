@@ -5,7 +5,7 @@ There is a Saying "**You Dont take a Photograph you make it" and here it is...**
 Face-Potrait is an attempt to create Art using Code(AAS - Art As Code).This repository uses of algorithms from Image Processing, Voxelisation, 3D Mathematics and what not.
 
 ### Result 
-<img src = "results/FacePotrait_1_7.png" width="200" height="200 >  
+<img src = "results/FacePotrait_1_7.png" width="200" height="200">  
 
 ### To Run the code.
  ``` 
