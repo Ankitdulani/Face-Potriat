@@ -6,8 +6,10 @@ Face-Potrait is an attempt to create Art using Code(AAS - Art As Code).This repo
 
 ## Base Image
 <img src = "results/ColorImagePotrait_1.png" width="300" height="300">
-<img src = "results/FacePotrait_1_7.png" width="300" height="300"> 
 
+## Results
+
+<img src = "results/FacePotrait_1_7.png" width="300" height="300"> 
 <img src = "results/resultsCollage.jpg">
 
 
