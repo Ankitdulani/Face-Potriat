@@ -89,12 +89,6 @@ class Voxeliser:
 
 		return points
 
-	def getColorEquation(plane, colorA, colorB, colorC):
-
-		constantR = vector.vector3D(colorA.r , colorB.r , colorC.r).dotProduct(plane.normalVec)
-		constantG = vector.vector3D(colorA.g , colorB.g , colorC.g).dotProduct(plane.normalVec)
-		constantB = vector.vector3D(colorA.b , colorB.b , colorC.b).dotProduct(plane.normalVec)
-
 	def getDisparitytMap( surface,l=1000,b=1000,h =1000, functionPLane ="XY"):
 
 
