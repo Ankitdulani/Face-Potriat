@@ -5,20 +5,10 @@ There is a Saying "**You Dont take a Photograph you make it" and here it is...**
 Face-Potrait is an attempt to create Art using Code(AAS - Art As Code).This repository uses of algorithms from Image Processing, Voxelisation, 3D Mathematics and what not.
 
 ## Base Image
-<img src = "results/ColorImagePotrait_1.png" style="float: left; width: 30%; margin-right: 1%; margin-bottom: 0.5em;">
-<img src = "results/FacePotrait_1_7.png" style="float: left; width: 30%; margin-right: 1%; margin-bottom: 0.5em;"> 
+<img src = "results/ColorImagePotrait_1.png" width="300" height="300">
+<img src = "results/FacePotrait_1_7.png" width="300" height="300"> 
 
-### No Shadder Effect
-
-<img src = "results/FacePotrait_1_5.png" width="300" height="300"> 
-
-### With Background Intensity High And Shadder Effect
-
-<img src = "results/FacePotrait_1_4.png" width="300" height="300">
-
-### With Background Intesity Low And Shadder Effect
-
-<img src = "results/FacePotrait_LowIntensity.png" width="300" height="300">
+<img src = "results/resultsCollage.jpg">
 
 
 ### To Run the code.
