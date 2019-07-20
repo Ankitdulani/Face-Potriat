@@ -1,6 +1,7 @@
 import operator
 import numpy as np
 from modules import Point
+from modules import ColorSchema
 
 class bresenhamLine:
 	def __init__ (self):
@@ -8,12 +9,16 @@ class bresenhamLine:
 
 	## Takes input in Point2D format
 	## Also a list of tuples
-	def drawLine(img, *argv):
+	def drawLine(img,colorPlateValue=0, *argv):
+
+		x= ColorSchema.ColorPlate(colorPlateValue)
+		colorValue = x.foregroundColor
+
 
 		vertexes =[] 
 
 		isColor = False
-		if len(img.shape) >= 3:
+		if len(img.shape) > 2:
 			isColor = True
 
 		if len(argv) > 2:
@@ -23,7 +28,7 @@ class bresenhamLine:
 			vertexes=argv[0]
 
 		else :
-			vertexes=[(argv[0].x,argv[0].y),(argv[1].x,argv[1].y)]
+			vertexes=[(int(argv[0].x),int(argv[0].y)),(int(argv[1].x),int(argv[1].y))]
 
 
 		######## Follow the Link for derivation
@@ -31,10 +36,10 @@ class bresenhamLine:
 
 		#Sort the List on the basis of X cordinate
 		vertexes = sorted ( vertexes, key=operator.itemgetter(0))
-		x1 = vertexes[0][0]
-		y1 = vertexes[0][1]
-		x2 = vertexes[1][0]
-		y2 = vertexes[1][1]
+		x1 = int(vertexes[0][0])
+		y1 = int(vertexes[0][1])
+		x2 = int(vertexes[1][0])
+		y2 = int(vertexes[1][1])
 
 		## Flag to hold is slope negative 
 		slopenegative = True if (y2-y1) < 0 else False
@@ -59,15 +64,16 @@ class bresenhamLine:
 
 			### Slope less than 1
 			if flag == True :
-				img[ y1 + count][x1+i] = np.uint8(0) if isColor == False else np.zeros(3 , dtype = np.uint8)
+				img[ y1 + count][x1+i] = np.uint8(0) if isColor == False else colorValue#np.zeros(3 , dtype = np.uint8)
 
 			### slope greater than 1
 			else:
 				#### slope negative check 
 				if slopenegative == False:
-					img [y2 - i][x2 - count] = np.uint8(0) if isColor == False else np.zeros(3 , dtype = np.uint8)
+					img [y2 - i][x2 - count] = np.uint8(0) if isColor == False else colorValue#np.zeros(3 , dtype = np.uint8)
+					# print(img [y2 - i][x2 - count])
 				else:
-					img [y2 +i ][x2 - count] = np.uint8(0) if isColor == False else np.zeros(3 , dtype = np.uint8)
+					img [y2 +i ][x2 - count] = np.uint8(0) if isColor == False else colorValue#np.zeros(3 , dtype = np.uint8)
 
 
 			if p >=0:

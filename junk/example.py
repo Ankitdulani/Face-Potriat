@@ -34,6 +34,105 @@ def getRandomLinesList( len,start=1,maxInterval=10):
 
 	return randomLines
 
+def createArt(displacementMap, img , scale =0.25 , randomLines = [] ):
+
+	print ("Create Art being called")
+
+	isColor = False
+	if len(img.shape) >= 3:
+		isColor = True
+
+	scaleA = 0.25
+	scaleB = 0.2
+
+	scaleLeft = 1
+
+	l = int(displacementMap.shape[0])
+	b = int(displacementMap.shape[1])
+
+	# img = testDisplacementMap (displacementMap)
+	# img = makeGray (img, displacementMap)
+
+	previousY = np.zeros( b ,dtype = int)
+
+	start = 1
+	count = 0
+
+	if len(randomLines) == 0:
+		randomLines = getRandomLinesList(len=l-start -1, start= start, maxInterval =15)
+
+	print ("length of randomLines",len (randomLines))
+
+	for i in range(len(randomLines)):
+
+		currY = randomLines[i]
+		prevY = currY
+
+		prevX = 0
+		currX = 0
+
+		prevZ = None
+		currZ = None
+
+		left = 0.0
+
+		if i % 2 ==0:
+			previousY.fill(0)
+			count +=1
+
+		while currX < b:
+			
+			currZ = displacementMap[currY][currX]
+
+			if currX == 0:
+				img[currY][currX]=np.uint8(0)
+				prevX = currX
+				prevY = currY
+				prevZ = currZ
+				
+				
+
+			if i%2 == 0:
+				previousY[currX]=currY
+			else:
+				img = BresenhamAlgo.bresenhamLine.drawLine(img,[(currX,currY),(currX,previousY[currX])])
+
+			if currX == 0:
+
+				# if i%2 == 1:
+				# 	print(previousY)
+				currX+=1
+				continue
+
+			#create a line prev to current 
+			# img[currY][currX]=np.uint8(0)
+			
+			#### Need modification
+			#### Reason it depends upon the slope of boundary 
+			##### If slope is < 1 than damper should be adjusted according
+			##### Will work afterwards
+
+			damper = 0.5
+			prevY = currY 
+			alpha = (scale*(currZ-prevZ))  + scaleLeft*left
+			roundAlpha = int (round(alpha,0))
+			
+			while abs(roundAlpha) > 1:
+				alpha = roundAlpha*damper
+				roundAlpha = int (round(alpha,0))
+
+			left = alpha - roundAlpha
+
+			currY = currY + roundAlpha
+
+			prevX = currX
+			currX += 1
+
+			prevZ = currZ
+
+	print("intialised to zero",count)
+	return img
+
 # Testig the texture being being copied
 def testTexture(surface,l=900,b=1000,h =1000):
 

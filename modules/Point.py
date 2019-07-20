@@ -19,6 +19,9 @@ class Point2D:
 
 		return point
 
+	def printPoint(self):
+		print (self.x , self.y)
+
 class Point3D:
 
 	def __init__ (self, x =0, y=0 , z=0):

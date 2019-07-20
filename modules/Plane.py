@@ -13,10 +13,16 @@ class Plane3D:
 
 		pt1, pt2, pt3 = Plane3D.sortPoints(pt1,pt2,pt3)
 
-		vectorA = vector.vector3D.getVector3D(pt2,pt1)
-		VectorB = vector.vector3D.getVector3D(pt3,pt1)
+		vectorA = vector.vector3D.getVector3D(pt1,pt2)
+		vectorB = vector.vector3D.getVector3D(pt1,pt3)
 
-		plane.normalVec = vector.vector3D.crossProduct(vectorA,VectorB)
+
+
+		if(pt2.y < pt3.y):
+			plane.normalVec = vector.vector3D.crossProduct(vectorA,vectorB)
+		else:
+			plane.normalVec = vector.vector3D.crossProduct(vectorB,vectorA)
+
 
 		posVector = pt1.pointToVec()
 
@@ -26,7 +32,7 @@ class Plane3D:
 
 	def printEquation(self):
 
-		print ("normal Vector" )
+		print ("normal Vector")
 		self.normalVec.printVector()
 		print ("constant" , self.d )
 		

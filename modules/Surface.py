@@ -1,17 +1,16 @@
 import math
+from modules import vector
 import numpy as np
 
 class surface:
 
 	def __init__ (self, X,Y,Z, Faces, texture = None):
-		
 		self.X = X
 		self.Y = Y
 		self.Z = Z
 
 		self.Faces = Faces
 		self.Texture = texture
-
 		self.Edges = []
 
 	def convertTextureForFaces(self):
@@ -51,6 +50,9 @@ class surface:
 		return self.Edges
 
 	def getBoundaryEdges(self):
+
+		self.setEdges()
+		print(len(self.Edges))
 
 		hashMapParllelEdges=dict()
 		boundaryEdges=[]
@@ -115,4 +117,6 @@ class surface:
 			(newSurface.Faces).append([pt1,pt2,indexV+1])
 
 			indexV+=2
+
+
 

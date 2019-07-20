@@ -15,7 +15,6 @@ class vector2D:
 
 		return vector2D(self.x/mag, self.y/mag)
 
-
 	def getModulus(self):
 		return math.sqrt( self.x **2 + self.y **2)
 
@@ -23,9 +22,24 @@ class vector2D:
 	def addVector( self, A):
 		return ( vector2D(self.x+A.x,self.y+A.y))
 
+	def subVector(self,A):
+		return ( vector2D(self.x-A.x,self.y-A.y))
+
 	def scaledVector(self ,mag):
 		n = self.unitVector()
 		return (vector2D( mag * n.x , mag * n.y ))
+
+	def getCos(A,B):
+		return (A.x * B.x + (A.y * B.y))
+
+	def projectedVector(A,B):
+		A_unit = A.unitVector()
+		mod = getCos(A_unit,B)
+		return A_unit.scaledVector(mod)
+
+	def perpendicularVector(A,B):
+		projected_component = vector2D.projectedVector(B,A)
+		return (B.subVector(projectedVector))
 
 	def printVector(self):
 		print ( self.x , self.y)
@@ -38,12 +52,12 @@ class vector3D:
 		self.y = y
 		self.z = z
 
-	def getVector3D( pt2, pt1):
+	def getVector3D( pt1, pt2):
 
 		vec = vector3D()
-		vec.x = pt1.x - pt2.x
-		vec.y = pt1.y - pt2.y
-		vec.z = pt1.z - pt2.z
+		vec.x = pt2.x - pt1.x
+		vec.y = pt2.y - pt1.y
+		vec.z = pt2.z - pt1.z
 		return (vec)
 
 	def getMagnitude ( self):
@@ -111,9 +125,18 @@ class vector3D:
 		
 		return vector3D.addVector(incident, vecReflectedAlongNormal)
 
+	def getAngle(A,B):
+		return math.acos(vector3D.getCos(A,B))
 
-
-
+	def getRotaionAngles(A):
+		zAngle = vector3D.getAngle(A, vector3D(0,0,1))
+		vec = vector3D(A.x,A.y,0)
+		xAngle = vector3D.getAngle(vec,vector3D(1,0,0))
+		yAngle = vector3D.getAngle(vec,vector3D(0,1,0))
+		if vec.getMagnitude() == float(0):
+			xAngle=0
+			yAngle=0
+		return (xAngle,yAngle,1*zAngle)
 
 
 

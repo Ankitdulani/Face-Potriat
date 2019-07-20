@@ -26,6 +26,9 @@ class Line2D:
 
 		return line
 
+	def getLinePoint(pt1, pt2):
+		return Line2D.getLine((pt1.x,pt1.y),(pt2.x,pt2.y))
+
 	def getY(self, x):
 
 		if self.b == 0:
@@ -47,7 +50,11 @@ class Line2D:
 
 		return int(-1*round((float(self.b*y+self.c)/float(self.a)),0))
 
+	def getDistance(self, point):
 
+		mod = math.sqrt( self.a**2  + self.b**2)
+		value = float (abs( self.a*point.x + self.b*point.y + self.c ))
+		return value/mod;
 
 	def printLine(self):
 		print (self.a, self.b, self.c)
