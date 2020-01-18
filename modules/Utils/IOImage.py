@@ -112,12 +112,6 @@ class reader:
 
 				for i in range(1,len(v)-1,1):
 					Faces.append([v[0],v[i],v[i+1]])
-
-				# a = int(str(x[1]).split('/')[0]) -1
-				# b = int(str(x[2]).split('/')[0]) -1
-				# c = int(str(x[3]).split('/')[0]) -1
-				# #[int(x[1])-1,int(x[2])-1,int(x[3])-1]
-				# Faces.append([a,b,c])
 				
 		Texture = None if len(Texture) == 0 else Texture
 		
@@ -129,6 +123,10 @@ class reader:
 		if folder == "Text":
 			base_path = self.pathResource / "Text"
 
+		
+		if folder == "anomorphosis":
+			base_path = self.pathResource / "anomorphosis"
+		
 		fileName = img_prefix+str(name)+img_suffix
 		filePath = base_path / fileName
 
@@ -136,9 +134,10 @@ class reader:
 			filePath = self.currentPath / self.inter_result / fileName
 			
 		# return Image.open(str(filePath))
-		print(str(filePath))
+		#print(str(filePath))
 		img = cv2.imread(str(filePath))
-		print(img.shape)
+		
+		# print(img.shape)
 		# return img
 		return cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
 		# return  skimage.io.imread(str(filePath))

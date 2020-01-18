@@ -7,6 +7,12 @@ class Plane3D:
 		self.normalVec = vector.vector3D()
 		self.d = 0
 
+	def setAxis( self, vec):
+		self.normalVec = vec
+
+	def setD(self,d):
+		self.d = d
+
 	def getPlaneEquation(pt1,pt2,pt3):
 
 		plane = Plane3D()
@@ -79,6 +85,18 @@ class Plane3D:
 			pt2 , pt3 = Plane3D.swapPoint(pt2,pt3)
 
 		return pt1, pt2, pt3 
+
+	def getIntersectionWithLine ( self , line):
+
+		den = line.dir.dotProduct(self.normalVec)
+		if den == 0:
+			return line.pos
+
+		lamda = ( self.d + line.pos.dotProduct(self.normalVec)) / den 
+		return vector.vector3D.addVector(
+					line.pos,
+					vector.vector3D.scalerMultpy(line.dir,-1*lamda))
+
 
 	def swapPoint(A,B):
 		return B,A
