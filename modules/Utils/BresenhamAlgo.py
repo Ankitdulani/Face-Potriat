@@ -33,7 +33,7 @@ class bresenhamLine:
 
 		######## Follow the Link for derivation
 		######## https://www.tutorialspoint.com/computer_graphics/line_generation_algorithm.html
-
+		# print(vertexes)
 		#Sort the List on the basis of X cordinate
 		vertexes = sorted ( vertexes, key=operator.itemgetter(0))
 		x1 = int(vertexes[0][0])
@@ -72,9 +72,10 @@ class bresenhamLine:
 				if slopenegative == False:
 					img [y2 - i][x2 - count] = np.uint8(0) if isColor == False else colorValue#np.zeros(3 , dtype = np.uint8)
 					# print(img [y2 - i][x2 - count])
+					
 				else:
-					img [y2 +i ][x2 - count] = np.uint8(0) if isColor == False else colorValue#np.zeros(3 , dtype = np.uint8)
-
+					img [y2 +i ][x2 + count] = np.uint8(0) if isColor == False else colorValue#np.zeros(3 , dtype = np.uint8)
+					# print(y2-i,x2-count)
 
 			if p >=0:
 				count += int( -1 ) if slopenegative == True else int(1)

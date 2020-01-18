@@ -71,6 +71,10 @@ class vector3D:
 
 		return vector3D(A.x/mag, A.y/mag , A.z/mag)
 
+	def scaledVector(A ,mag):
+		A = vector3D.getUnitVector(A)
+		return vector3D( mag * A.x , mag * A.y , mag * A.z)
+
 	def crossProduct( vectorA, vectorB):
 
 		a = vectorA.y*vectorB.z - vectorA.z * vectorB.y
@@ -104,7 +108,15 @@ class vector3D:
 		return vector3D(self.x,self.y,self.z)
 
 	def printVector(self):
-		print ( self.x , self.y, self.z)	
+		print ("{:.4f} {:.4f} {:.4f}".format(self.x,self.y,self.z))
+
+	def isParallel ( vecA , vecB ):
+		A = getUnitVector( vecA ) 
+		B = getUnitVector( vecB )
+		err = 0.000001
+		if (abs(A.x-B.x)<=err and abs(A.y-B.y)<=err and abs(A.z-B.z)<=err):
+			return True
+		return False
 
 
 	def getCos(A, B):
@@ -113,6 +125,17 @@ class vector3D:
 		B = vector3D.getUnitVector(B)
 
 		return A.dotProduct(B)
+
+	#return parallel component of vector1 wrt vecto2
+	def getParallelComponet(vec1, vec2):
+
+		vec2 = vector3D.getUnitVector(vec2)
+		cos = vector3D.getCos(vec1,vec2)
+		magnitute = vec1.getMagnitude()
+		return vector3D.scalerMultpy(vec2, float(magnitute*cos))
+
+	def getPerpendicularComponent(vec1, vec2):
+		return vector3D.addVector(vec1,vector3D.scalerMultpy(vector3D.getParallelComponet(vec1,vec2),float(-1)))
 
 	def getReflectedVector(normal , incident):
 

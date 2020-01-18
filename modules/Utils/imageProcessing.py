@@ -1,4 +1,5 @@
 import numpy as np 
+from modules.Utils import IOImage
 import cv2
 
 class IP:
@@ -24,6 +25,7 @@ class IP:
 
 	def adjust_gamma(image, gamma=1.3):
 
+		print(gamma)
 		table  = tableI = np.array([(((i)/ 255.0) ** gamma) * 255
 			for i in np.arange(0, 256)]).astype("uint8")
 
@@ -33,7 +35,7 @@ class IP:
 			for i in np.arange(0, 256)]).astype("uint8")
 
 		l , b = image.shape[:2]
-		base = 110
+		base = 60
 
 		for i in range(l):
 			for j in range(b):
@@ -53,30 +55,52 @@ class IP:
 
 		return image
 
-	def createSketch(img_gray):
+
+	def createSketch(img_gray, grudge ,Writer):
 
 		#Converting a Colored to GrayScale
 		if len( img_gray.shape) > 2:
 			img_gray = cv2.cvtColor(img_gray, cv2.COLOR_BGR2GRAY)
 
+		if len( grudge.shape) > 2:
+			grudge = cv2.cvtColor(grudge, cv2.COLOR_BGR2GRAY)
 
-		# Creating a Negative Image of it
+		img_gray = cv2.resize( img_gray , (512,512) )
+		grudge = cv2.resize( grudge , img_gray.shape)
+		
 		img_gray_inv = 255 - img_gray
 
-		# Apply Gausian Blur
-		img_blur = cv2.GaussianBlur(img_gray_inv, ksize=(21, 21),sigmaX=0, sigmaY=0)
+		# This step make the darker point lighter
+		img_blur = cv2.GaussianBlur(img_gray_inv, ksize=(51, 51),sigmaX=0, sigmaY=0)
 
-		#dogete Negative and the present Image
+		#This brings out a image with darker points
 		img_blend = cv2.divide(img_gray, 255-img_blur, scale=256)
 
-		img_blend = cv2.multiply(img_blend, img_gray, scale=1/256)
+		# Erosion to reduce noise from the image 
+		kernel = np.ones((5,5),np.uint8)
+		erosion = cv2.erode(255-img_blend,kernel,iterations = 1)
+		erosion2 = cv2.erode(erosion,kernel,iterations = 1)
 
-		return img_blend
+		# This Step Darken the boundary
+		output = cv2.multiply(img_blend, 255-erosion, scale=1/256)
+
+		# Step Darken the boundary and shift the gradient to saturated one
+		factor = 3
+		output = cv2.multiply(output, 255-erosion2, scale=1/(256*factor))
+
+		# Linear burn 
+		# Lighten the Images
+		img_color_dodge = IP.blend_color_dodge(output,img_gray)
+
+		mask_grudge = IP.blend_screen(img_gray,grudge,.2)
+		output = IP.blend_overlay(mask_grudge, img_color_dodge,0.85)
+
+		return output
 
 	def adaptiveThreshold (img , threshold =150):
 
 		img = cv2.adaptiveThreshold(img,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C,cv2.THRESH_BINARY,5,5)
-		return im
+		return img
 
 	def BlueGreen(img, thres_x,thres_y=0):
 		if len( img.shape) > 2:
@@ -94,6 +118,33 @@ class IP:
 
 		return result;
 
+	### Darkening BLENDS
+	#The best mode for darkening. Works by multiplying the luminance levels of the current layer’s pixels with the pixels in the layers below. 
+	def blend_multiply(A, B,factor=1):
+		return cv2.multiply(A,B,scale=(1/(256*factor)))
+
+	#Darker than Multiply, with more highly saturated mid-tones and reduced highlights.
+	def blend_color_burn(A,B):
+		return 255 - cv2.divide(255-B,A,scale = 256)
+
+
+	####LIGHTING BLENDS
+	# Takes darkes of both and turn them more darker and innverting 
+	# thereby increasing the contrast.	
+	def blend_screen(A,B,factor):
+		return 255 - cv2.multiply(255-A, 255-B, scale=1/(256*factor))
+
+	#Brighter than the Screen blend mode. Results in an intense, contrasty color-typically results in saturated mid-tones and blown highlights.
+	def blend_color_dodge(A,B,scale=256):
+		return cv2.divide(A, 255-B,scale=scale)
+
+	# Brighter than the Color Dodge blend mode, but less saturated and intense.
+	def blend_linear_dodge(A,B):
+		return cv2.add(A,B)
+
+	def blend_overlay(A,B,alpha=1):
+		return cv2.addWeighted(B, alpha, A, 1 - alpha,0)
+
 	def overlay(img,colorValue):
 
 		# print (colorValue)
@@ -109,6 +160,22 @@ class IP:
 		result[:,:,2] = ((float(colorValue[2])/255)*n_img[:,:])
 
 		return result
+
+
+	def brush(id):
+
+		if id == 0: 
+			return np.array(	[[1,0, 1, 1, 0],
+								[1, 1, 0, 0, 1],
+								[1, 1, 1, 1, 1],
+								[0, 1, 1, 1, 1],
+								[0, 0, 1, 1, 1]])
+
+             
+    
+
+
+
 
 	#def likeInstaPost(img):
 
